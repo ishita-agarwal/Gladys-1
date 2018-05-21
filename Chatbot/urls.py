@@ -1,11 +1,11 @@
 from django.conf.urls import url
 from . import views
 
-app_name = "Chatbot"
+app_name = "chatbot"
 
 urlpatterns = [
 
-    url(r'^$', views.chat, name='chat'),
-    url(r'^restaurant/$', views.restaurant, name='restaurant'),
-    url(r'^user/$', views.user, name='user'),
+    url(r'^bot/$', views.chat, name='Chatbot'),
+    url(r'^post/$', views.Post, name='Post'),
+    url(r'^messages/$', views.Messages, name='messages'),
 ]

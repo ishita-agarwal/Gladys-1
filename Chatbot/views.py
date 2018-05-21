@@ -1,33 +1,42 @@
+from django.http import JsonResponse
+from .models import Restaurant, Chat
 from django.shortcuts import render
-from .models import Restaurant, User
+from django.http import HttpResponse
+from django.utils.safestring import mark_safe
+from about.models import User
 
-from django.shortcuts import render     # for linking with templates ie HTML file
+def Post(request):
+    if request.method == 'POST':
+        msg = request.POST.get('message', None)
+        username = User.objects.all().order_by('-id')[0].name
+        c = Chat(username=username, message=msg, isuser=True)
+
+        if msg != '':
+            c.save()
+
+        if msg=='Restaurant':
+            for restaurant in Restaurant.objects.all():
+                name = restaurant.name
+                shop_no = restaurant.address.shop_no
+                sector = restaurant.address.sector
+                city = restaurant.address.city
+                rating = restaurant.rating
+
+                response = mark_safe("Name : " + name + "<br>Rating : " + str(rating) +  "<br>Address : " + str(shop_no) + "<br>Sector: " + str(sector) + " ," + city)
+
+                c = Chat(username='Gladys', message=response, isuser=False)
+
+                c.save()
+
+        return JsonResponse({'msg': msg, 'username':username})
+    else:
+        HttpResponse('Request must be POST')
 
 def chat(request):
-    return render(request, 'Chatbot/chat.html', {})
+    c = Chat.objects.all()
+    return render(request, 'Chatbot/chat.html', {'chat': c})
 
-def restaurant(request):        # for displaying all restaurants
-    query = request.POST.get('send-request', None)
-    # context = {}
-
-    all_restaurants = Restaurant.objects.all()
-    # context.update({'results':results})
-    context = {
-        'all_restaurants': all_restaurants,
-    }
-
-    return render(request, 'Chatbot/restaurant.html', context)  # it redirects to another page /restaurant JUST FOR TESTING
-
-
-def user(request):        # for displaying all users
-    query = request.POST.get('send-request', None)
-    # context = {}
-
-    all_users = User.objects.all()
-    # context.update({'results':results})
-    context = {
-        'all_users': all_users,
-    }
-
-    return render(request, 'Chatbot/user.html', context)  # it redirects to another page /restaurant JUST FOR TESTING
+def Messages(request):
+    c = Chat.objects.all()
+    return render(request, 'Chatbot/messages.html', {'chat': c})
 
